@@ -1,0 +1,4 @@
+# Emulasi
+
+Windows Game Emulator.
+
