@@ -1,4 +1,3 @@
 # Emulasi
 
 Windows Game Emulator.
-
