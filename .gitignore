@@ -1,5 +1,9 @@
 /build
 /ext
+
+*.ini
+
 /emulasi
-/emulasi.exe
-/*.ini
+emulasi.exe
+emulasid.exe
+*.pdb
