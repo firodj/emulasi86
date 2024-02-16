@@ -23,7 +23,7 @@ include_directories(SYSTEM
   ${IMGUI_DIR}/backends
 )
 
-add_executable(emulasi
+set(SOURCE
   ${VENDOR_DIR}/main.cpp
   ${VENDOR_DIR}/Engine.cpp
   ${VENDOR_DIR}/Component.cpp
@@ -34,6 +34,19 @@ add_executable(emulasi
   ${IMGUI_DIR}/imgui_draw.cpp
   ${IMGUI_DIR}/imgui_tables.cpp
   ${IMGUI_DIR}/imgui_widgets.cpp
+
+  src/MainApp.cpp
+)
+
+SET(HEADERS
+  ${VENDOR_DIR}/Component.h
+  ${VENDOR_DIR}/Engine.h
+
+  src/MainApp.h
+)
+
+add_executable(emulasi
+  ${SOURCE} ${HEADERS}
 )
 
 target_compile_definitions(emulasi PUBLIC
