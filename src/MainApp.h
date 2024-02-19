@@ -9,6 +9,8 @@ public:
 protected:
   MainApp(/* dependency */);
 
+  void RunImGui() override;
+
 public:
   MainApp(MainApp &other) = delete;
   void operator=(const MainApp &) = delete;

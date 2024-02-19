@@ -1,3 +1,7 @@
+#include "imgui.h"
+#include "imgui_impl_sdl2.h"
+#include "imgui_impl_sdlrenderer2.h"
+
 #include "MainApp.h"
 
 #include <thread>
@@ -28,4 +32,11 @@ MainApp::~MainApp() {
 void MainApp::Init() {
     InitSDL();
     InitImGui();
+}
+
+void MainApp::RunImGui() {
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImColor clear_color(m_clear_color);
+
+    EngineBase::RunImGui();
 }
