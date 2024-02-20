@@ -4,7 +4,9 @@ project(emulasi)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 17)
+
 option("USE_VM" "Use hardware virtualization backend for Unicorn-Engine" OFF)
+
 find_package(OpenGL REQUIRED)
 
 set(IMGUI_DIR ext/imgui-docking)
@@ -78,4 +80,5 @@ set_target_properties(emulasi PROPERTIES
   VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
   DEBUG_POSTFIX "d"
 )
+
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT emulasi)
