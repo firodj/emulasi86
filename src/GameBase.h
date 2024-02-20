@@ -35,6 +35,7 @@ public:
   virtual std::string title() { return "Game"; }
   void WaitToStop();
   void StartThread();
+  float framerate() { return m_framerate; }
 
 protected:
   std::thread *m_thread;
@@ -53,4 +54,6 @@ protected:
 
   SDL_Window *window_;
   SDL_GLContext glcontext_;
+
+  float m_framerate;
 };

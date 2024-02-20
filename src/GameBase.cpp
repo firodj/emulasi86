@@ -29,7 +29,7 @@ static const char *fragmentShaderSource = "#version 330 core\n"
     "}";
 
 GameBase::GameBase(): shader_program_(-1), fb_(-1), rb_(-1), tex_flip_flop_(0),
-  request_stop_(false), render_full_(false), m_thread(nullptr)
+  request_stop_(false), render_full_(false), m_thread(nullptr), m_framerate(0.0)
 {
   tex_[0] = -1;
   tex_[1] = -1;
@@ -48,6 +48,8 @@ void GameBase::Init(int w, int h)
     window_height_ = h;
 
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_OPENGL );
+
+    window_flags = (SDL_WindowFlags)(window_flags | SDL_WINDOW_HIDDEN);
 
     window_ = SDL_CreateWindow(title().c_str(),
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, window_width_, window_height_, window_flags);
@@ -119,8 +121,8 @@ void GameBase::CompileShader()
   glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
   if (!success)
   {
-      glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-      std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+    glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+    std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
   }
 
   // fragment shader
@@ -131,8 +133,8 @@ void GameBase::CompileShader()
   glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
   if (!success)
   {
-      glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-      std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+    glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+    std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
   }
 
   // link shaders
@@ -143,8 +145,8 @@ void GameBase::CompileShader()
   // check for linking errors
   glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
   if (!success) {
-      glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-      std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+    glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+    std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
   }
   glDeleteShader(vertexShader);
   glDeleteShader(fragmentShader);
@@ -197,9 +199,8 @@ void GameBase::ConfigureVertex()
 
 void GameBase::Render()
 {
-    // TODO: disable me, to draw to offscreen-fb
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+  // NOTE: disable me, to draw to offscreen-fb
+  //glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float)1024 / (float)768, 0.1f, 100.0f);
   glm::mat4 view(1.0);
@@ -252,7 +253,7 @@ void GameBase::SwapBuffer()
   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
 
-    SDL_GL_SwapWindow(window_);
+  SDL_GL_SwapWindow(window_);
 }
 
 void GameBase::ClearRenderFull()
@@ -265,16 +266,14 @@ void GameBase::ClearRenderFull()
 
 int GameBase::Run()
 {
-    std::cout << "Game thread start" << std::endl;
-    SDL_GL_MakeCurrent(window_, glcontext_);
-    if (SDL_GL_SetSwapInterval(1)) // Enable vsync
-        printf("Error: SDL_GL_SetSwapInterval(): %s\n", SDL_GetError());
+  std::cout << "Game thread start" << std::endl;
+  SDL_GL_MakeCurrent(window_, glcontext_);
+  if (SDL_GL_SetSwapInterval(1)) // Enable vsync
+      printf("Error: SDL_GL_SetSwapInterval(): %s\n", SDL_GetError());
 
-    SDL_GL_GetDrawableSize(window_, &screen_width_, &screen_height_);
-    hidpi_x_ = (float)screen_width_ / window_width_;
-    hidpi_y_ = (float)screen_height_ / window_height_;
-
-    printf("off-screen (%d, %d)\n", screen_width_, screen_height_);
+  SDL_GL_GetDrawableSize(window_, &screen_width_, &screen_height_);
+  hidpi_x_ = (float)screen_width_ / window_width_;
+  hidpi_y_ = (float)screen_height_ / window_height_;
 
   CreateFramebuffer();
 
@@ -286,6 +285,7 @@ int GameBase::Run()
 
   glViewport(0, 0, screen_width_, screen_height_);
 
+  Uint64 old_ticks = SDL_GetTicks64();
   while (!request_stop_) {
     SDL_Event event;
     while (SDL_PollEvent(&event)) ;
@@ -294,6 +294,11 @@ int GameBase::Run()
     SwapBuffer();
 
     render_full_ = true;
+    Uint64 delta = SDL_GetTicks64() - old_ticks;
+    if (delta <= 0) delta = 1;
+    m_framerate = 1000.0 / delta;
+
+    old_ticks = SDL_GetTicks64();
   }
   return 0;
 }
