@@ -9,6 +9,7 @@ option("USE_VM" "Use hardware virtualization backend for Unicorn-Engine" OFF)
 
 find_package(OpenGL REQUIRED)
 
+set(GLM_DIR ext/glm)
 set(IMGUI_DIR ext/imgui-docking)
 set(VENDOR_DIR kosongg/vendor)
 set(GLAD_SOURCES_DIR "${PROJECT_SOURCE_DIR}/ext/glad2")
@@ -35,6 +36,7 @@ include_directories(SYSTEM
 
   ${unicorn_SOURCE_DIR}/include
   ${YAML_CPP_SOURCE_DIR}/include
+  ${GLM_DIR}
 )
 
 set(SOURCE
@@ -50,6 +52,7 @@ set(SOURCE
   ${IMGUI_DIR}/imgui_widgets.cpp
 
   src/MainApp.cpp
+  src/GameBase.cpp
 )
 
 SET(HEADERS
@@ -57,6 +60,7 @@ SET(HEADERS
   ${VENDOR_DIR}/Engine.h
 
   src/MainApp.h
+  src/GameBase.h
 )
 
 add_executable(emulasi

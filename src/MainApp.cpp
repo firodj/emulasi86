@@ -3,6 +3,7 @@
 #include "imgui_impl_sdlrenderer2.h"
 
 #include "MainApp.h"
+#include "GameBase.h"
 
 #include <thread>
 #include <mutex>
@@ -22,21 +23,41 @@ MainApp *MainApp::GetInstance(/* dependency */)
 }
 
 MainApp::MainApp(/* dependency */): kosongg::EngineBase(/* dependency */) {
-
+    m_game = new GameBase();
 }
 
 MainApp::~MainApp() {
-
+    if (m_game) delete m_game;
 }
 
 void MainApp::Init() {
     InitSDL();
     InitImGui();
+
+    m_game->Init(640, 480);
+    m_game->StartThread();
 }
 
 void MainApp::RunImGui() {
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     ImColor clear_color(m_clear_color);
 
+    if (ImGui::BeginMainMenuBar())
+    {
+        if (ImGui::BeginMenu("File"))
+        {
+            if (ImGui::MenuItem("Open", "Ctrl+O")) {}
+            ImGui::EndMenu();
+        }
+        ImGui::EndMainMenuBar();
+    }
+
     EngineBase::RunImGui();
+}
+
+
+void MainApp::Clean() {
+    m_game->WaitToStop();
+
+    m_game->Finish();
 }
