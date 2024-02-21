@@ -20,7 +20,8 @@ public:
   virtual ~GameBase();
 
   virtual int Run();
-  void Init(int w, int h);
+  virtual void Init(int w, int h);
+  virtual void StartThread();
   void Finish();
 
   void CompileShader();
@@ -28,28 +29,30 @@ public:
   void Render();
 
   void CreateFramebuffer();
+  void SwapBuffer();
+  void WaitToStop();
 
   void set_request_stop(bool value) { m_request_stop = value; }
+  bool stopped() { return m_stopped; }
   GLuint tex();
-
-  void SwapBuffer();
   float hidpi_x() { return m_hidpi_x; }
   float hidpi_y() { return m_hidpi_y; }
   int window_width() { return m_window_width; }
   int window_height() { return m_window_height; }
-  virtual std::string title() { return "Game"; }
-  void WaitToStop();
-  void StartThread();
+  std::string title() { return m_title; }
   float framerate() { return m_framerate; }
+
+  bool p_open;
 
 protected:
   std::thread *m_thread;
+  std::string m_title;
   GameBaseConfig m_config;
 
   GLuint m_shader_program, m_vao;
   GLuint m_fb, m_rb, m_tex[2];
   int m_tex_flip_flop;
-  bool m_request_stop;
+  bool m_request_stop, m_stopped;
   int m_window_width, m_window_height;
   int m_screen_width, m_screen_height;
   float m_hidpi_x, m_hidpi_y;
@@ -60,4 +63,6 @@ protected:
   SDL_GLContext m_glcontext;
 
   float m_framerate;
+
+  static int ID;
 };

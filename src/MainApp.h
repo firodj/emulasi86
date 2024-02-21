@@ -1,9 +1,10 @@
 #pragma once
 
 #include <memory>
-#include "../kosongg/vendor/Engine.h"
+#include <vector>
 
-class GameBase;
+#include "../kosongg/vendor/Engine.h"
+#include "GameBase.h"
 
 class MainApp: public kosongg::EngineBase {
 public:
@@ -13,8 +14,7 @@ protected:
   MainApp(/* dependency */);
 
   void RunImGui() override;
-
-  GameBase *m_game;
+  std::vector<std::unique_ptr<GameBase>> m_games;
 
 public:
   MainApp(MainApp &other) = delete;

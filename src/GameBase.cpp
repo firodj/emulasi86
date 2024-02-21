@@ -3,6 +3,8 @@
 #include "GameBase.h"
 #include <SDL.h>
 #include <iostream>
+#include <string>
+
 #include "../kosongg/vendor/Engine.h"
 #include "../kosongg/vendor/GLUtil.h"
 
@@ -29,12 +31,16 @@ static const char *fragmentShaderSource = "#version 330 core\n"
     "}";
 
 GameBase::GameBase(GameBaseConfig config): m_shader_program(-1), m_fb(-1), m_rb(-1), m_tex_flip_flop(0),
-  m_request_stop(false), m_thread(nullptr), m_framerate(0.0)
+  m_request_stop(false), m_thread(nullptr), m_framerate(0.0), m_stopped(false)
 {
   m_tex[0] = -1;
   m_tex[1] = -1;
   m_config = config;
-  std::cout << "Game constructed" << std::endl;
+  p_open = true;
+
+  m_title = "Game " + std::to_string(++GameBase::ID);
+
+  std::cout << "Game constructed: " << m_title << std::endl;
 }
 
 GameBase::~GameBase()
@@ -59,14 +65,11 @@ void GameBase::Init(int w, int h)
       return;
   }
 
-  SDL_GLContext oldctx = SDL_GL_GetCurrentContext();
-  if (oldctx == nullptr) {
-    printf("Error: SDL_GL_GetCurrentContext(): %s\n", SDL_GetError());
-  }
-
   m_glcontext = SDL_GL_CreateContext(m_window);
   if (m_glcontext == nullptr) {
       printf("Error: SDL_GL_CreateContext(): %s\n", SDL_GetError());
+      SDL_DestroyWindow(m_window);
+      m_window = nullptr;
       return;
   }
 
@@ -79,14 +82,12 @@ void GameBase::Init(int w, int h)
       printf("Error: SDL_GL_SetSwapInterval(): %s\n", SDL_GetError());
     }
   }
-
-  SDL_GL_MakeCurrent(m_window, oldctx);
 }
 
 void GameBase::Finish()
 {
-    SDL_GL_DeleteContext(m_glcontext);
-    SDL_DestroyWindow(m_window);
+  SDL_GL_DeleteContext(m_glcontext);
+  SDL_DestroyWindow(m_window);
 }
 
 void GameBase::CreateFramebuffer()
@@ -323,15 +324,18 @@ int GameBase::Run()
 }
 
 void GameBase::StartThread() {
-    if (m_thread) return;
-    m_thread = new std::thread([&]{
-        Run();
-    });
+  if (m_thread) return;
+  m_thread = new std::thread([&]{
+    Run();
+    m_stopped = true;
+  });
 }
 
 void GameBase::WaitToStop() {
-    m_request_stop = true;
-    if (m_thread) {
-        m_thread->join();
-    }
+  m_request_stop = true;
+  if (m_thread) {
+    m_thread->join();
+  }
 }
+
+int GameBase::ID = 0;
