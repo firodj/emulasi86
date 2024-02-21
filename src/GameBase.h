@@ -1,16 +1,22 @@
 #pragma once
-#include <glad/gl.h>
 
 #include <mutex>
-#include <condition_variable>
 
 struct SDL_Window;
 typedef void *SDL_GLContext;
+typedef unsigned int GLuint;
+
+struct GameBaseConfig {
+  bool use_swap;
+  int fps_time;
+
+  GameBaseConfig();
+};
 
 class GameBase
 {
 public:
-  GameBase();
+  GameBase(GameBaseConfig config = GameBaseConfig());
   virtual ~GameBase();
 
   virtual int Run();
@@ -23,15 +29,14 @@ public:
 
   void CreateFramebuffer();
 
-  void set_request_stop(bool value) { request_stop_ = value; }
+  void set_request_stop(bool value) { m_request_stop = value; }
   GLuint tex();
-  bool render_full() { return render_full_; }
-  void ClearRenderFull();
+
   void SwapBuffer();
-  float hidpi_x() { return hidpi_x_; }
-  float hidpi_y() { return hidpi_y_; }
-  int window_width() { return window_width_; }
-  int window_height() { return window_height_; }
+  float hidpi_x() { return m_hidpi_x; }
+  float hidpi_y() { return m_hidpi_y; }
+  int window_width() { return m_window_width; }
+  int window_height() { return m_window_height; }
   virtual std::string title() { return "Game"; }
   void WaitToStop();
   void StartThread();
@@ -39,21 +44,20 @@ public:
 
 protected:
   std::thread *m_thread;
+  GameBaseConfig m_config;
 
-  GLuint shader_program_, vao_;
-  GLuint fb_, rb_, tex_[2];
-  int tex_flip_flop_;
-  bool request_stop_;
-  int window_width_, window_height_;
-  int screen_width_, screen_height_;
+  GLuint m_shader_program, m_vao;
+  GLuint m_fb, m_rb, m_tex[2];
+  int m_tex_flip_flop;
+  bool m_request_stop;
+  int m_window_width, m_window_height;
+  int m_screen_width, m_screen_height;
+  float m_hidpi_x, m_hidpi_y;
 
-  std::mutex mtx_render_full_;
-  bool render_full_;
-  std::condition_variable cv_render_full_;
-  float hidpi_x_, hidpi_y_;
+  std::mutex m_mtx_render_full;
 
-  SDL_Window *window_;
-  SDL_GLContext glcontext_;
+  SDL_Window *m_window;
+  SDL_GLContext m_glcontext;
 
   float m_framerate;
 };
