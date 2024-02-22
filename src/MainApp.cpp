@@ -66,28 +66,22 @@ void MainApp::RunImGui() {
         }
         ImGui::End();
       } else {
+        if (game->stopped()) {
+          printf("stopped\n");
+          game->WaitToStop();
+          game->Finish();
+
+          SDL_GL_MakeCurrent(m_window, m_glcontext);
+
+          it = m_games.erase(it);
+          continue;
+        }
         game->set_request_stop(true);
       }
     }
     it++;
   }
-#if 1
-  for (auto it = m_games.begin(); it != m_games.end(); /* NOP */ ) {
-    auto &game = *it;
-    if (game) {
-      if (game->stopped()) {
-        printf("stopped\n");
-        game->WaitToStop();
-        game->Finish();
-         SDL_GL_MakeCurrent(m_window, m_glcontext);
 
-        it = m_games.erase(it);
-        continue;
-      }
-    }
-    it++;
-  }
-#endif
   EngineBase::RunImGui();
 }
 

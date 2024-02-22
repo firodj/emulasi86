@@ -22,6 +22,10 @@ public:
   virtual int Run();
   virtual void Init(int w, int h);
   virtual void StartThread();
+
+  /**
+   * Release resources, delete OpenGL context and SDLWindow.
+   */
   void Finish();
 
   void CompileShader();

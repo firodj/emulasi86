@@ -292,9 +292,6 @@ int GameBase::Run()
 
   int frame_count = 0;
   while (!m_request_stop) {
-    SDL_Event event;
-    while (SDL_PollEvent(&event)) ;
-
     Render();
     SwapBuffer();
 
