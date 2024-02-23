@@ -7,3 +7,5 @@
 emulasi.exe
 emulasid.exe
 *.pdb
+
+/venv

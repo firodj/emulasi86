@@ -7,6 +7,15 @@ set(CMAKE_C_STANDARD 17)
 
 option("USE_VM" "Use hardware virtualization backend for Unicorn-Engine" OFF)
 
+if (APPLE)
+  ## update the environment with VIRTUAL_ENV variable (mimic the activate script)
+  set (ENV{VIRTUAL_ENV} "${CMAKE_SOURCE_DIR}/venv")
+  ## change the context of the search
+  set (Python3_FIND_VIRTUALENV FIRST)
+  ## unset Python3_EXECUTABLE because it is also an input variable (see documentation, Artifacts Specification section)
+  unset (Python3_EXECUTABLE)
+endif()
+
 find_package(OpenGL REQUIRED)
 
 set(GLM_DIR ext/glm)
@@ -56,6 +65,7 @@ set(SOURCE
   src/GameBase.cpp
   src/Shader.cpp
   src/Offscreen.cpp
+  src/PlainBox.cpp
 )
 
 SET(HEADERS
@@ -67,6 +77,7 @@ SET(HEADERS
   src/GameBase.h
   src/Shader.h
   src/Offscreen.h
+  src/PlainBox.h
 )
 
 include_directories(

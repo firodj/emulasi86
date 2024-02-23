@@ -1,12 +1,14 @@
 #pragma once
 
 #include <mutex>
+#include <thread>
 
 struct SDL_Window;
 typedef void *SDL_GLContext;
 typedef unsigned int GLuint;
 class Shader;
 class Offscreen;
+class PlainBox;
 
 struct GameBaseConfig {
   bool use_swap;
@@ -55,8 +57,6 @@ protected:
   std::string m_title;
   GameBaseConfig m_config;
 
-  GLuint m_vao;
-
   bool m_request_stop, m_stopped;
   int m_window_width, m_window_height;
   int m_screen_width, m_screen_height;
@@ -71,4 +71,5 @@ protected:
 
   Shader *m_shader;
   Offscreen *m_offscreen;
+  PlainBox *m_plain_box;
 };
