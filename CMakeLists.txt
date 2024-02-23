@@ -53,6 +53,7 @@ set(SOURCE
 
   src/MainApp.cpp
   src/GameBase.cpp
+  src/Shader.cpp
 )
 
 SET(HEADERS
@@ -61,6 +62,7 @@ SET(HEADERS
 
   src/MainApp.h
   src/GameBase.h
+  src/Shader.h
 )
 
 add_executable(emulasi

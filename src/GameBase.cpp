@@ -1,37 +1,20 @@
 // Game.cpp
 
-#include "GameBase.h"
 #include <SDL.h>
 #include <iostream>
 #include <string>
-
-#include "../kosongg/vendor/Engine.h"
-#include "../kosongg/vendor/GLUtil.h"
-
 #include <chrono>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-static const char *vertexShaderSource = "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "uniform mat4 projection;\n"
-    "uniform mat4 view;\n"
-    "uniform mat4 model;\n"
-    "void main()\n"
-    "{\n"
-    "  gl_Position = projection * view * model * vec4(aPos, 1.0f);\n"
-    "}";
-
-static const char *fragmentShaderSource = "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "void main()\n"
-    "{\n"
-    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "}";
+#include "../kosongg/vendor/Engine.h"
+#include "../kosongg/vendor/GLUtil.h"
+#include "GameBase.h"
+#include "Shader.h"
 
 GameBase::GameBase(GameBaseConfig config): m_shader_program(-1), m_fb(-1), m_rb(-1), m_tex_flip_flop(0),
-  m_request_stop(false), m_thread(nullptr), m_framerate(0.0), m_stopped(false)
+  m_request_stop(false), m_thread(nullptr), m_framerate(0.0), m_stopped(false), m_shader(nullptr)
 {
   m_tex[0] = -1;
   m_tex[1] = -1;
@@ -46,6 +29,7 @@ GameBase::GameBase(GameBaseConfig config): m_shader_program(-1), m_fb(-1), m_rb(
 GameBase::~GameBase()
 {
   if (m_thread) delete m_thread;
+  if (m_shader) delete m_shader;
   std::cout << "Game destroyed" << std::endl;
 }
 
@@ -130,50 +114,9 @@ void GameBase::CreateFramebuffer()
 
 void GameBase::CompileShader()
 {
-  // build and compile our shader program
-  // ------------------------------------
-  // vertex shader
-  int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-  glCompileShader(vertexShader);
-
-  // check for shader compile errors
-  int success;
-  char infoLog[512];
-  glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-  if (!success)
-  {
-    glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-    std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-  }
-
-  // fragment shader
-  int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-  glCompileShader(fragmentShader);
-  // check for shader compile errors
-  glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-  if (!success)
-  {
-    glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-    std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-  }
-
-  // link shaders
-  int shaderProgram = glCreateProgram();
-  glAttachShader(shaderProgram, vertexShader);
-  glAttachShader(shaderProgram, fragmentShader);
-  glLinkProgram(shaderProgram);
-  // check for linking errors
-  glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-  if (!success) {
-    glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-    std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-  }
-  glDeleteShader(vertexShader);
-  glDeleteShader(fragmentShader);
-
-  m_shader_program = shaderProgram;
+  m_shader = new Shader();
+  m_shader->Load("./data/default.vert", "./data/default.frag");
+  m_shader->Compile();
 }
 
 void GameBase::ConfigureVertex()
@@ -233,11 +176,12 @@ void GameBase::Render()
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  glUseProgram(m_shader_program);
-
-  glUniformMatrix4fv(glGetUniformLocation(m_shader_program, "projection"), 1, GL_FALSE, glm::value_ptr(proj));
-  glUniformMatrix4fv(glGetUniformLocation(m_shader_program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-  glUniformMatrix4fv(glGetUniformLocation(m_shader_program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+  if (m_shader) {
+    m_shader->Activate();
+    m_shader->SetMatrix4("projection", false, proj);
+    m_shader->SetMatrix4("view", false, view);
+    m_shader->SetMatrix4("model", false, model);
+  }
 
   glBindVertexArray(m_vao); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
   //glDrawArrays(GL_TRIANGLES, 0, 6);

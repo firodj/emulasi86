@@ -5,6 +5,7 @@
 struct SDL_Window;
 typedef void *SDL_GLContext;
 typedef unsigned int GLuint;
+class Shader;
 
 struct GameBaseConfig {
   bool use_swap;
@@ -69,4 +70,6 @@ protected:
   float m_framerate;
 
   static int ID;
+
+  Shader *m_shader;
 };
