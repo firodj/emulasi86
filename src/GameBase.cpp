@@ -8,16 +8,15 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "../kosongg/vendor/Engine.h"
-#include "../kosongg/vendor/GLUtil.h"
+#include "kosongg/Engine.h"
+#include "kosongg/GLUtil.h"
 #include "GameBase.h"
 #include "Shader.h"
+#include "Offscreen.h"
 
-GameBase::GameBase(GameBaseConfig config): m_shader_program(-1), m_fb(-1), m_rb(-1), m_tex_flip_flop(0),
-  m_request_stop(false), m_thread(nullptr), m_framerate(0.0), m_stopped(false), m_shader(nullptr)
+GameBase::GameBase(GameBaseConfig config):
+  m_request_stop(false), m_thread(nullptr), m_framerate(0.0), m_stopped(false), m_shader(nullptr), m_offscreen(0)
 {
-  m_tex[0] = -1;
-  m_tex[1] = -1;
   m_config = config;
   p_open = true;
 
@@ -30,6 +29,7 @@ GameBase::~GameBase()
 {
   if (m_thread) delete m_thread;
   if (m_shader) delete m_shader;
+  if (m_offscreen) delete m_offscreen;
   std::cout << "Game destroyed" << std::endl;
 }
 
@@ -45,16 +45,16 @@ void GameBase::Init(int w, int h)
   m_window = SDL_CreateWindow(title().c_str(),
     SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, m_window_width, m_window_height, window_flags);
   if (m_window == nullptr) {
-      printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
-      return;
+    printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
+    return;
   }
 
   m_glcontext = SDL_GL_CreateContext(m_window);
   if (m_glcontext == nullptr) {
-      printf("Error: SDL_GL_CreateContext(): %s\n", SDL_GetError());
-      SDL_DestroyWindow(m_window);
-      m_window = nullptr;
-      return;
+    printf("Error: SDL_GL_CreateContext(): %s\n", SDL_GetError());
+    SDL_DestroyWindow(m_window);
+    m_window = nullptr;
+    return;
   }
 
   SDL_GL_GetDrawableSize(m_window, &m_screen_width, &m_screen_height);
@@ -65,6 +65,8 @@ void GameBase::Init(int w, int h)
     if (SDL_GL_SetSwapInterval(1)) { // Enable vsync
       printf("Error: SDL_GL_SetSwapInterval(): %s\n", SDL_GetError());
     }
+  } else {
+    SDL_GL_SetSwapInterval(0);
   }
 }
 
@@ -76,40 +78,8 @@ void GameBase::Finish()
 
 void GameBase::CreateFramebuffer()
 {
-  // framebuffer configuration
-  glGenFramebuffers(1, &m_fb);
-  glBindFramebuffer(GL_FRAMEBUFFER, m_fb);
-
-  // create a color attachment texture
-  glGenTextures(2, m_tex);
-
-  glBindTexture(GL_TEXTURE_2D, m_tex[0]);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_screen_width, m_screen_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-  glBindTexture(GL_TEXTURE_2D, m_tex[1]);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_screen_width, m_screen_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-  int tex_offscreen = (m_tex_flip_flop + 1) % 2;
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_tex[tex_offscreen], 0);
-
-  // create a renderbuffer object for depth and stencil attachment (we won't be sampling these)
-  glGenRenderbuffers(1, &m_rb);
-  glBindRenderbuffer(GL_RENDERBUFFER, m_rb);
-  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_screen_width, m_screen_height);
-
-  // use a single renderbuffer object for both a depth AND stencil buffer.
-  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_rb);
-  kosongg::CheckGLError(__FILE__, __LINE__);
-  // now actually attach it
-
-  if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-    std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  m_offscreen = new Offscreen();
+  m_offscreen->Init(m_screen_width, m_screen_height);
 }
 
 void GameBase::CompileShader()
@@ -190,24 +160,13 @@ void GameBase::Render()
 }
 
 GLuint GameBase::tex() {
-  std::unique_lock<std::mutex> lck(m_mtx_render_full);
-  return m_tex[ m_tex_flip_flop ];
+  if (m_offscreen) return m_offscreen->GetTexture();
+  return GL_NONE;
 }
 
 void GameBase::SwapBuffer()
 {
-  std::unique_lock<std::mutex> lck(m_mtx_render_full);
-
-  glFlush();
-
-  m_tex_flip_flop = (m_tex_flip_flop + 1) % 2;
-  int tex_offscreen = (m_tex_flip_flop + 1) % 2;
-
-  glBindFramebuffer(GL_FRAMEBUFFER, m_fb);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_tex[tex_offscreen], 0);
-
-  if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-    std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+  if (m_offscreen) m_offscreen->SwapTexture();
 
   if (m_config.use_swap) {
     SDL_GL_SwapWindow(m_window);
@@ -226,8 +185,7 @@ int GameBase::Run()
   CompileShader();
   ConfigureVertex();
 
-  glBindFramebuffer(GL_FRAMEBUFFER, m_fb);
-  kosongg::CheckGLError(__FILE__, __LINE__);
+  if (m_offscreen) m_offscreen->Activate();
 
   glViewport(0, 0, m_screen_width, m_screen_height);
 

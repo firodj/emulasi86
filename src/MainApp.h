@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "../kosongg/vendor/Engine.h"
+#include "kosongg/Engine.h"
 #include "GameBase.h"
 
 class MainApp: public kosongg::EngineBase {

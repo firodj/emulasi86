@@ -11,7 +11,7 @@ find_package(OpenGL REQUIRED)
 
 set(GLM_DIR ext/glm)
 set(IMGUI_DIR ext/imgui-docking)
-set(VENDOR_DIR kosongg/vendor)
+set(VENDOR_DIR kosongg/cpp)
 set(GLAD_SOURCES_DIR "${PROJECT_SOURCE_DIR}/ext/glad2")
 
 set(SDL_TEST OFF)
@@ -43,6 +43,7 @@ set(SOURCE
   ${VENDOR_DIR}/main.cpp
   ${VENDOR_DIR}/Engine.cpp
   ${VENDOR_DIR}/Component.cpp
+
   ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
   ${IMGUI_DIR}/backends/imgui_impl_sdl2.cpp
   ${IMGUI_DIR}/imgui.cpp
@@ -54,17 +55,24 @@ set(SOURCE
   src/MainApp.cpp
   src/GameBase.cpp
   src/Shader.cpp
+  src/Offscreen.cpp
 )
 
 SET(HEADERS
-  ${VENDOR_DIR}/Component.h
-  ${VENDOR_DIR}/Engine.h
+  ${VENDOR_DIR}/kosongg/Component.h
+  ${VENDOR_DIR}/kosongg/Engine.h
+  ${VENDOR_DIR}/kosongg/GLUtil.h
 
   src/MainApp.h
   src/GameBase.h
   src/Shader.h
+  src/Offscreen.h
 )
 
+include_directories(
+  ${VENDOR_DIR}
+  src
+)
 add_executable(emulasi
   ${SOURCE} ${HEADERS}
 )

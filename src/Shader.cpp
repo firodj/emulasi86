@@ -1,6 +1,7 @@
+#include <glad/gl.h> // include glad to get all the required OpenGL headers
+
 #include "Shader.h"
 
-#include <glad/gl.h> // include glad to get all the required OpenGL headers
 #include <glm/gtc/type_ptr.hpp>
 #include <string>
 #include <fstream>

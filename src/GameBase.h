@@ -6,6 +6,7 @@ struct SDL_Window;
 typedef void *SDL_GLContext;
 typedef unsigned int GLuint;
 class Shader;
+class Offscreen;
 
 struct GameBaseConfig {
   bool use_swap;
@@ -54,15 +55,12 @@ protected:
   std::string m_title;
   GameBaseConfig m_config;
 
-  GLuint m_shader_program, m_vao;
-  GLuint m_fb, m_rb, m_tex[2];
-  int m_tex_flip_flop;
+  GLuint m_vao;
+
   bool m_request_stop, m_stopped;
   int m_window_width, m_window_height;
   int m_screen_width, m_screen_height;
   float m_hidpi_x, m_hidpi_y;
-
-  std::mutex m_mtx_render_full;
 
   SDL_Window *m_window;
   SDL_GLContext m_glcontext;
@@ -72,4 +70,5 @@ protected:
   static int ID;
 
   Shader *m_shader;
+  Offscreen *m_offscreen;
 };
