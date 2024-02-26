@@ -9,3 +9,4 @@ emulasid.exe
 *.pdb
 
 /venv
+.DS_Store
