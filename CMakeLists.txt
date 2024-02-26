@@ -18,7 +18,7 @@ find_package(OpenGL REQUIRED)
 option("USE_VM" "Use hardware virtualization backend for Unicorn-Engine" OFF)
 set("UNICORN_BUILD_SAMPLES" OFF)
 set("UNICORN_ARCH" "x86")
-add_subdirectory(ext/unicorn)
+add_subdirectory(ext/unicorn2)
 set("SDL_TEST" OFF)
 set("SDL2_DISABLE_SDL2MAIN" ON)
 add_subdirectory(ext/sdl2)
@@ -27,7 +27,6 @@ set("GLAD_SOURCES_DIR" "${PROJECT_SOURCE_DIR}/ext/glad2")
 add_subdirectory("${GLAD_SOURCES_DIR}/cmake" glad_cmake)
 glad_add_library(glad_gl_core_33 REPRODUCIBLE API gl:core=3.3)
 set("GLM_DIR" "ext/glm")
-add_subdirectory(ext/yaml-cpp)
 
 include_directories(SYSTEM
   ${OPENGL_INCLUDE_DIR}
@@ -91,7 +90,6 @@ target_link_libraries(emulasi
   unicorn
   SDL2-static
   glad_gl_core_33
-  yaml-cpp
 )
 
 set_target_properties(emulasi PROPERTIES
