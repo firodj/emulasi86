@@ -1,12 +1,16 @@
 /build
 /ext
-
+/bin
 *.ini
-
-/emulasi
-emulasi.exe
-emulasid.exe
 *.pdb
 
+/.venv
 /venv
 .DS_Store
+build-*/
+*.dSYM/
+ext/
+.venv
+
+/.vscode
+/.env
