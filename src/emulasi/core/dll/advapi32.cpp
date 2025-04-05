@@ -11,7 +11,7 @@
 namespace emulasi {
 ////////////////////////////////////////////////////////////////////////////////
 
-/Applications /Library /System /Users /Volumes /bin /cores /dev /etc /home /opt /private /sbin /tmp /usr /var
+/**
  * RegCloseKey
  * @returnn LSTATUS
  */
@@ -27,11 +27,10 @@ ExportReturnParam API__RegCloseKey(GameEmuInterface * game,
 		);
 #endif
 
-	// FIXME: Always success
 	return API__ERROR_SUCCESS;
 }
 
-/Applications /Library /System /Users /Volumes /bin /cores /dev /etc /home /opt /private /sbin /tmp /usr /var
+/**
  * GetUserNameA
  * @return BOOL
  */
@@ -70,7 +69,7 @@ ExportReturnParam API__GetUserNameA(GameEmuInterface * game_,
 	return (bool)true;
 }
 
-/Applications /Library /System /Users /Volumes /bin /cores /dev /etc /home /opt /private /sbin /tmp /usr /var
+/**
  * RegCreateKeyExA
  * @return LSTATUS
  */
@@ -140,7 +139,7 @@ ExportReturnParam API__RegCreateKeyExA(GameEmuInterface * game_,
 	return API__ERROR_SUCCESS;
 }
 
-/Applications /Library /System /Users /Volumes /bin /cores /dev /etc /home /opt /private /sbin /tmp /usr /var
+/**
  * RegQueryValueExA
  * @return LSTATUS
  */
@@ -171,18 +170,10 @@ ExportReturnParam API__RegQueryValueExA(GameEmuInterface * game_,
 #if DBG_PRINT
 	if (lpValueName) fmt::print(stderr, "-- szValueName={}\n", fmt::styled((char*)lpValueName, fmt::fg(fmt::color::lime)));
 #endif
-
-	// Patch to accept the CD
-	if (!strcmp(lpValueName, "CD Path"))
-	{
-		//FIXME: Assert that there is enough room for the path
-		strcpy((char*)lpData, "D:");
-		return API__ERROR_SUCCESS;
-	}
 	return API__ERROR_FILE_NOT_FOUND;
 }
 
-/Applications /Library /System /Users /Volumes /bin /cores /dev /etc /home /opt /private /sbin /tmp /usr /var
+/**
  * RegSetValueExA
  * @return LSTATUS
  */
@@ -216,7 +207,7 @@ ExportReturnParam API__RegSetValueExA(GameEmuInterface * game_,
 }
 
 // Copy protection
-/Applications /Library /System /Users /Volumes /bin /cores /dev /etc /home /opt /private /sbin /tmp /usr /var
+/**
  * RegOpenKeyExA
  * @return LSTATUS
  */
@@ -269,14 +260,13 @@ ExportReturnParam API__RegOpenKeyExA(GameEmuInterface * game_,
 
 	fmt::print(stderr, "-- hkResult={:#x} ('{:s}')\n", keyResult, open_key_path);
 
-
 	if (phkResult) {
 		*phkResult = keyResult;
 	}
 	return API__ERROR_SUCCESS;
 }
 
-/Applications /Library /System /Users /Volumes /bin /cores /dev /etc /home /opt /private /sbin /tmp /usr /var
+/**
  * RegOpenKeyA
  * @return LSTATUS
  */
