@@ -79,7 +79,7 @@ ExportReturnParam API__CoCreateInstance(GameEmuInterface * game_,
 					iid->Data4[4], iid->Data4[5], iid->Data4[6], iid->Data4[7]);
 	fmt::print(stderr, "  (read iid: {:s})\n", iidString);
 
-	static unsigned int comIndex = 0;
+
 	std::string name;
 
 	// TODO: add more classed / interfaces
@@ -115,7 +115,6 @@ ExportReturnParam API__CoCreateInstance(GameEmuInterface * game_,
 	}
 
 	*ppv = game_->CreateInterface(name.c_str(), 200);
-	comIndex++;
 
 	return API__S_OK;
 }

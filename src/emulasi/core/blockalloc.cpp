@@ -4,7 +4,7 @@
 #include <libassert/assert.hpp>
 
 #include "blockalloc.hpp"
-#include "common.h"
+#include "memalign.hpp"
 
 #define DBG_PAD    1
 #define DBG_EXPAND 2
