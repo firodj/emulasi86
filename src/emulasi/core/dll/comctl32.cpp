@@ -27,7 +27,7 @@ ExportReturnParam API__InitCommonControls(GameEmuInterface * game_)
 ComCtl32Dll::ComCtl32Dll(GameEmuInterface* game): DllBase(game) {}
 ComCtl32Dll::~ComCtl32Dll() {}
 void ComCtl32Dll::Register() {
-	game_->exportAddNewT<API__InitCommonControls>("InitCommonControls",  0);
+	game_->ExportAddT<API__InitCommonControls>("InitCommonControls");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

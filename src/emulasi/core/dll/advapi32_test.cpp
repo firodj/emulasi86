@@ -55,7 +55,7 @@ protected:
 		return data;
 	}
 
-	Export& exportAddNew(const char* name, ExportCallbackT callback_t, Address address) override {
+	Export& ExportAdd(const char* name, ExportCallbackT callback_t) override {
 		//std::cout << "--- Register " << name << std::endl;
 		Export export_handler;
 

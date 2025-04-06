@@ -307,13 +307,13 @@ AdvApi32Dll::~AdvApi32Dll() {}
 
 void AdvApi32Dll::Register()
 {
-	game_->exportAddNewT<API__RegCreateKeyExA>("RegCreateKeyExA",  0);
-	game_->exportAddNewT<API__RegQueryValueExA>("RegQueryValueExA",  0);
-	game_->exportAddNewT<API__RegSetValueExA>("RegSetValueExA",  0);
-	game_->exportAddNewT<API__RegOpenKeyExA>("RegOpenKeyExA",  0);
-	game_->exportAddNewT<API__RegOpenKeyA>("RegOpenKeyA",  0);
-	game_->exportAddNewT<API__RegCloseKey>("RegCloseKey",  0);
-	game_->exportAddNewT<API__GetUserNameA>("GetUserNameA",  0);
+	game_->ExportAddT<API__RegCreateKeyExA>("RegCreateKeyExA");
+	game_->ExportAddT<API__RegQueryValueExA>("RegQueryValueExA");
+	game_->ExportAddT<API__RegSetValueExA>("RegSetValueExA");
+	game_->ExportAddT<API__RegOpenKeyExA>("RegOpenKeyExA");
+	game_->ExportAddT<API__RegOpenKeyA>("RegOpenKeyA");
+	game_->ExportAddT<API__RegCloseKey>("RegCloseKey");
+	game_->ExportAddT<API__GetUserNameA>("GetUserNameA");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
