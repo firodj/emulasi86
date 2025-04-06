@@ -1,0 +1,18 @@
+#pragma once
+
+namespace emulasi {
+////////////////////////////////////////////////////////////////////////////////
+class GameEmuInterface;
+
+class DllBase
+{
+public:
+	DllBase(GameEmuInterface* game): game_(game) {};
+	virtual ~DllBase() {};
+	virtual void Register() = 0;
+
+protected:
+	GameEmuInterface* game_;
+};
+////////////////////////////////////////////////////////////////////////////////
+};
