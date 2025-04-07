@@ -162,6 +162,11 @@ TEST_F(AdvApi32Test, RegSetValueExA) {
 	stack_data[5] = 0x00000020; // lpData
 	stack_data[6] = 0x00000040; // lpcbData
 
+	const char *value_name_str = "InstallDir";
+	auto &value_name = memories_[0x00600010];
+	value_name.resize(strlen(value_name_str) + 1);
+	strcpy((char*)value_name.data(), value_name_str);
+
 	ExportStackParam * p = (ExportStackParam *)stack_data.data();
 	auto ret = export_handlers["RegSetValueExA"].callback_t(this, p);
 
@@ -177,7 +182,7 @@ TEST_F(AdvApi32Test, RegOpenKeyExA) {
 	stack_data[2] = 0x00600010; // lpSubKey
 	stack_data[3] = 0x00000010; // ulOptions
 	stack_data[4] = 0x00000020; // samDesired
-	stack_data[5] = 0x00600100; // phkResult
+	stack_data[5] = 0x0;        // phkResult
 
 	const char *sub_key_str = "Default";
 	auto &sub_key = memories_[0x00600010];

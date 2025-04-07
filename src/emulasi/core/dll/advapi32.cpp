@@ -35,8 +35,8 @@ ExportReturnParam API__RegCloseKey(GameEmuInterface * game,
  * @return BOOL
  */
 ExportReturnParam API__GetUserNameA(GameEmuInterface * game_,
-	char* lpBuffer,      // [out] LPSTR
-	uint32_t* pcbBuffer) // [in, out] LPDWORD
+	Ptr32 lpBuffer,  // [out] LPSTR
+	Ptr32 pcbBuffer) // [in, out] LPDWORD
 {
 	const char* name = "DummyUser";
 	size_t len = strlen(name) + 1;
@@ -44,21 +44,21 @@ ExportReturnParam API__GetUserNameA(GameEmuInterface * game_,
 #if DBG_PRINT
 	fmt::print(stderr, "{:s}(lpBuffer={},pcbBuffer={})\n",
 		fmt::styled("GetUserNameA", fmt::fg(fmt::color::gold)),
-		fmt::styled(fmt::ptr(lpBuffer), fmt::fg(fmt::color::aqua)),
-		fmt::styled(fmt::ptr(pcbBuffer), fmt::fg(fmt::color::aqua))
+		fmt::styled(lpBuffer, fmt::fg(fmt::color::aqua)),
+		fmt::styled(pcbBuffer, fmt::fg(fmt::color::aqua))
 	);
 #endif
 
 	if (!pcbBuffer) return (bool)false;
 
 #if DBG_PRINT
-	fmt::print(stderr, "-- cbBuffer={}\n", fmt::styled(*pcbBuffer, fmt::fg(fmt::color::fuchsia)));
+	fmt::print(stderr, "-- cbBuffer={}\n", fmt::styled(*pcbBuffer.Mem<uint32_t>(game_), fmt::fg(fmt::color::fuchsia)));
 #endif
 
-	if (*pcbBuffer >= len)
+	if (*pcbBuffer.Mem<uint32_t>(game_) >= len)
 	{
-		strncpy(lpBuffer, name, len);
-		*pcbBuffer = len;
+		strncpy(lpBuffer.Mem<char>(game_), name, len);
+		*pcbBuffer.Mem<uint32_t>(game_) = len;
 	}
 	else
 	{
@@ -75,27 +75,27 @@ ExportReturnParam API__GetUserNameA(GameEmuInterface * game_,
  */
 ExportReturnParam API__RegCreateKeyExA(GameEmuInterface * game_,
 	uint32_t hKey,                 // [in] HKEY
-	char* lpSubKey,                // [in] LPCSTR
+	Ptr32    lpSubKey,             // [in] LPCSTR
 	uint32_t _reserved,
-	char* lpClass,                 // [in, optional] LPSTR
+	Ptr32    lpClass,              // [in, optional] LPSTR
 	uint32_t dwOptions,            // [in] DWORD
 	uint32_t samDesired,           // [in] REGSAM
-	void* lpSecurityAttributes,    // [in, optional] const LPSECURITY_ATTRIBUTES
-	uint32_t *phkResult,           // [out] PHKEY
-	uint32_t *lpdwDisposition)     // [out, optional] LPDWORD
+	Ptr32    lpSecurityAttributes, // [in, optional] const LPSECURITY_ATTRIBUTES
+	Ptr32    phkResult,            // [out] PHKEY
+	Ptr32    lpdwDisposition)      // [out, optional] LPDWORD
 {
 #if DBG_PRINT
 	fmt::print(stderr, "{}(hKey={:#X},",
 		fmt::styled("RegCreateKeyExA", fmt::fg(fmt::color::gold)),
 		fmt::styled(hKey, fmt::fg(fmt::color::fuchsia))
 		);
-	fmt::print(stderr, "lpSubKey={},", fmt::styled(fmt::ptr(lpSubKey), fmt::fg(fmt::color::aqua)));
-	fmt::print(stderr, "lpClass={},", fmt::styled(fmt::ptr(lpClass), fmt::fg(fmt::color::aqua)));
+	fmt::print(stderr, "lpSubKey={},", fmt::styled(lpSubKey, fmt::fg(fmt::color::aqua)));
+	fmt::print(stderr, "lpClass={},", fmt::styled(lpClass, fmt::fg(fmt::color::aqua)));
 	fmt::print(stderr, "dwOptions={:#x},", fmt::styled(dwOptions, fmt::fg(fmt::color::fuchsia)));
 	fmt::print(stderr, "samDesired={:#x},", fmt::styled(samDesired, fmt::fg(fmt::color::fuchsia)));
-	fmt::print(stderr, "lpSecurityAttributes={},", fmt::styled(fmt::ptr(lpSecurityAttributes), fmt::fg(fmt::color::aqua)));
-	fmt::print(stderr, "phkResult={},", fmt::styled(fmt::ptr(phkResult), fmt::fg(fmt::color::aqua)));
-	fmt::print(stderr, "lpdwDisposition={})\n", fmt::styled(fmt::ptr(lpdwDisposition), fmt::fg(fmt::color::aqua)));
+	fmt::print(stderr, "lpSecurityAttributes={},", fmt::styled(lpSecurityAttributes, fmt::fg(fmt::color::aqua)));
+	fmt::print(stderr, "phkResult={},", fmt::styled(phkResult, fmt::fg(fmt::color::aqua)));
+	fmt::print(stderr, "lpdwDisposition={})\n", fmt::styled(lpdwDisposition, fmt::fg(fmt::color::aqua)));
 #endif
 
 	if (!lpSubKey)
@@ -107,8 +107,8 @@ ExportReturnParam API__RegCreateKeyExA(GameEmuInterface * game_,
 	}
 
 #if DBG_PRINT
-	if (lpSubKey) fmt::print(stderr, "-- szSubKey={}\n", fmt::styled((char*)lpSubKey, fmt::fg(fmt::color::lime)));
-	if (lpClass) fmt::print(stderr, "-- szClass={}\n", fmt::styled((char*)lpClass, fmt::fg(fmt::color::lime)));
+	if (lpSubKey) fmt::print(stderr, "-- szSubKey={}\n", fmt::styled(lpSubKey.Mem<char>(game_), fmt::fg(fmt::color::lime)));
+	if (lpClass) fmt::print(stderr, "-- szClass={}\n", fmt::styled(lpClass.Mem<char>(game_), fmt::fg(fmt::color::lime)));
 #endif
 
 	auto impl_ = game_->GetRegistryManager();
@@ -120,20 +120,20 @@ ExportReturnParam API__RegCreateKeyExA(GameEmuInterface * game_,
 		return API__ERROR_INVALID_HANDLE;
 	}
 
-	std::string key_path = impl_->FullPath(hKey);
-	auto new_key_path = fmt::format("{}\\{}", key_path, (char*)lpSubKey);
-	auto keyResult = impl_->Traverse(new_key_path, true);
+	std::string keyPath = impl_->FullPath(hKey);
+	auto newKeyPath = fmt::format("{}\\{}", keyPath, lpSubKey.Mem<char>(game_));
+	auto keyResult = impl_->Traverse(newKeyPath, true);
 
 	if (!keyResult) {
-		fmt::print(stderr, fmt::fg(fmt::color::crimson), "ERROR: unable to create {:s}\n", new_key_path);
+		fmt::print(stderr, fmt::fg(fmt::color::crimson), "ERROR: unable to create {:s}\n", newKeyPath);
 		return API__ERROR_INVALID_PARAMETER;
 	}
 
-	fmt::print(stderr, "-- hkResult={:#x} ('{:s}')\n", keyResult, new_key_path);
+	fmt::print(stderr, "-- hkResult={:#x} ('{:s}')\n", keyResult, newKeyPath);
 
-	if (phkResult != 0)
+	if (phkResult)
 	{
-		*phkResult = keyResult;
+		*phkResult.Mem<uint32_t>(game_) = keyResult;
 	}
 
 	return API__ERROR_SUCCESS;
@@ -144,12 +144,12 @@ ExportReturnParam API__RegCreateKeyExA(GameEmuInterface * game_,
  * @return LSTATUS
  */
 ExportReturnParam API__RegQueryValueExA(GameEmuInterface * game_,
-	uint32_t hKey, // [in] HKEY
-	char *lpValueName, // [in, optional] LPCSTR
+	uint32_t hKey,        // [in] HKEY
+	Ptr32    lpValueName, // [in, optional] LPCSTR
 	uint32_t _reserved,
-	uint32_t *lpType, // [out, optional] LPDWORD
-	uint8_t *lpData, // [out, optional] LPBYTE
-	uint32_t *lpcbData) // [in, out, optional] LPDWORD
+	Ptr32    lpType,      // [out, optional] LPDWORD
+	Ptr32    lpData,      // [out, optional] LPBYTE
+	Ptr32    lpcbData)    // [in, out, optional] LPDWORD
 {
 	int returnValue = 0;
 
@@ -158,17 +158,17 @@ ExportReturnParam API__RegQueryValueExA(GameEmuInterface * game_,
 		fmt::styled("RegQueryValueExA", fmt::fg(fmt::color::gold)),
 		fmt::styled(hKey, fmt::fg(fmt::color::gold)));
 	fmt::print(stderr, "lpValueName=0{},",
-		fmt::styled(fmt::ptr(lpValueName), fmt::fg(fmt::color::aqua)));
+		fmt::styled(lpValueName, fmt::fg(fmt::color::aqua)));
 	fmt::print(stderr, "lpType={},",
-		fmt::styled(fmt::ptr(lpType), fmt::fg(fmt::color::aqua)));
+		fmt::styled(lpType, fmt::fg(fmt::color::aqua)));
 	fmt::print(stderr, "lpData={},",
-		fmt::styled(fmt::ptr(lpData), fmt::fg(fmt::color::aqua)));
+		fmt::styled(lpData, fmt::fg(fmt::color::aqua)));
 	fmt::print(stderr, "lpcbData={})\n",
-		fmt::styled(fmt::ptr(lpcbData), fmt::fg(fmt::color::aqua)));
+		fmt::styled(lpcbData, fmt::fg(fmt::color::aqua)));
 #endif
 
 #if DBG_PRINT
-	if (lpValueName) fmt::print(stderr, "-- szValueName={}\n", fmt::styled((char*)lpValueName, fmt::fg(fmt::color::lime)));
+	if (lpValueName) fmt::print(stderr, "-- szValueName={}\n", fmt::styled(lpValueName.Mem<char>(game_), fmt::fg(fmt::color::lime)));
 #endif
 	return API__ERROR_FILE_NOT_FOUND;
 }
@@ -178,29 +178,30 @@ ExportReturnParam API__RegQueryValueExA(GameEmuInterface * game_,
  * @return LSTATUS
  */
 ExportReturnParam API__RegSetValueExA(GameEmuInterface * game_,
-	uint32_t hKey,     // [in] HKEY
-	char *lpValueName, // [in, optional] LPCSTR
+	uint32_t hKey,        // [in] HKEY
+	Ptr32    lpValueName, // [in, optional] LPCSTR
 	uint32_t _reserved,
-	uint32_t dwType,   // [in] DWORD
-	uint8_t *lpData,   // [in] const PBYTE
-	uint32_t cbData)   // [in] DWORD
+	uint32_t dwType,      // [in] DWORD
+	Ptr32    lpData,      // [in] const PBYTE
+	uint32_t cbData)      // [in] DWORD
 {
 #if DBG_PRINT
 	fmt::print(stderr, "{}(hKey={:#x},",
 		fmt::styled("RegSetValueExA", fmt::fg(fmt::color::gold)),
 		fmt::styled(hKey, fmt::fg(fmt::color::gold)));
 	fmt::print(stderr, "lpValueName={},",
-		fmt::styled(fmt::ptr(lpValueName), fmt::fg(fmt::color::aqua)));
+		fmt::styled(lpValueName, fmt::fg(fmt::color::aqua)));
 	fmt::print(stderr, "dwType={:#x},",
 		fmt::styled(dwType, fmt::fg(fmt::color::fuchsia)));
 	fmt::print(stderr, "lpData={},",
-		fmt::styled(fmt::ptr(lpData), fmt::fg(fmt::color::aqua)));
+		fmt::styled(lpData, fmt::fg(fmt::color::aqua)));
 	fmt::print(stderr, "cbData={:d})\n",
 		fmt::styled(cbData, fmt::fg(fmt::color::fuchsia)));
 #endif
 
 #if DBG_PRINT
-	if (lpValueName) fmt::print(stderr, "-- szValueName={}\n", fmt::styled((char*)lpValueName, fmt::fg(fmt::color::lime)));
+	if (lpValueName) fmt::print(stderr, "-- szValueName={}\n",
+		fmt::styled(lpValueName.Mem<char>(game_), fmt::fg(fmt::color::lime)));
 #endif
 
 	return API__ERROR_SUCCESS;
@@ -213,55 +214,55 @@ ExportReturnParam API__RegSetValueExA(GameEmuInterface * game_,
  */
 ExportReturnParam API__RegOpenKeyExA(GameEmuInterface * game_,
 	uint32_t hKey,       // [in] HKEY
-	char *lpSubKey,      // [in, optional] LPCSTR
+	Ptr32 lpSubKey,      // [in, optional] LPCSTR
 	uint32_t ulOptions,  // [in] DWORD
 	uint32_t samDesired, // [in] REGSAM
-	uint32_t *phkResult) // [out] PHKEY
+	Ptr32 phkResult)     // [out] PHKEY
 {
 #if DBG_PRINT
 	fmt::print(stderr, "{}(hKey={:#x},", fmt::styled("RegOpenKeyExA",
 		fmt::fg(fmt::color::gold)),
 		fmt::styled(hKey, fmt::fg(fmt::color::fuchsia)));
 	fmt::print(stderr, "lpSubKey={},",
-		fmt::styled(fmt::ptr(lpSubKey), fmt::fg(fmt::color::aqua)));
+		fmt::styled(lpSubKey, fmt::fg(fmt::color::aqua)));
 	fmt::print(stderr, "ulOptions={:#x},",
 		fmt::styled(ulOptions, fmt::fg(fmt::color::fuchsia)));
 	fmt::print(stderr, "samDesired={:#x},",
 		fmt::styled(samDesired, fmt::fg(fmt::color::fuchsia)));
 	fmt::print(stderr, "phkResult={})\n",
-		fmt::styled(fmt::ptr(phkResult), fmt::fg(fmt::color::aqua)));
+		fmt::styled(phkResult, fmt::fg(fmt::color::aqua)));
 #endif
 
-	if (!lpSubKey || !*lpSubKey) {
+	if (!lpSubKey || !*lpSubKey.Mem<char>(game_)) {
 		if (phkResult) {
-			*phkResult = hKey;
+			*phkResult.Mem<uint32_t>(game_) = hKey;
 			return API__ERROR_SUCCESS;
 		}
 	}
 
 #if DBG_PRINT
-	if (lpSubKey) fmt::print(stderr, "-- szSubKey={}\n", fmt::styled((char*)lpSubKey, fmt::fg(fmt::color::lime)));
+	if (lpSubKey) fmt::print(stderr, "-- szSubKey={}\n", fmt::styled(lpSubKey.Mem<char>(game_), fmt::fg(fmt::color::lime)));
 #endif
 	auto impl_ = game_->GetRegistryManager();
-	std::string key_alias;
-	if (impl_->IsSpecialHKEY(hKey, &key_alias)) {
-		fmt::print(stderr, "-- hKey={}\n", key_alias);
+	std::string keyAlias;
+	if (impl_->IsSpecialHKEY(hKey, &keyAlias)) {
+		fmt::print(stderr, "-- hKey={}\n", keyAlias);
 	} else {
 		return API__ERROR_INVALID_HANDLE;
 	}
 
-	std::string key_path = impl_->FullPath(hKey);
-	auto open_key_path = fmt::format("{}\\{}", key_path, (char*)lpSubKey);
-	auto keyResult = impl_->Traverse(open_key_path, false);
+	std::string keyPath = impl_->FullPath(hKey);
+	auto openedKeyPath = fmt::format("{}\\{}", keyPath, lpSubKey.Mem<char>(game_));
+	auto keyResult = impl_->Traverse(openedKeyPath, false);
 
 	if (!keyResult) {
 		return API__ERROR_FILE_NOT_FOUND;
 	}
 
-	fmt::print(stderr, "-- hkResult={:#x} ('{:s}')\n", keyResult, open_key_path);
+	fmt::print(stderr, "-- hkResult={:#x} ('{:s}')\n", keyResult, openedKeyPath);
 
 	if (phkResult) {
-		*phkResult = keyResult;
+		*phkResult.Mem<uint32_t>(game_) = keyResult;
 	}
 	return API__ERROR_SUCCESS;
 }
@@ -271,9 +272,9 @@ ExportReturnParam API__RegOpenKeyExA(GameEmuInterface * game_,
  * @return LSTATUS
  */
 ExportReturnParam API__RegOpenKeyA(GameEmuInterface * game_,
-	uint32_t hKey,       // [in] HKEY
-	char *lpSubKey,      // [in, optional] LPCSTR
-	uint32_t *phkResult) // [out] PHKEY
+	uint32_t hKey,   // [in] HKEY
+	Ptr32 lpSubKey,  // [in, optional] LPCSTR
+	Ptr32 phkResult) // [out] PHKEY
 {
 	if (!phkResult) {
 		return API__ERROR_INVALID_PARAMETER;

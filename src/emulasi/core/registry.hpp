@@ -19,8 +19,6 @@
 namespace emulasi
 {
 ////////////////////////////////////////////////////////////////////////////////
-using Address = uint32_t;
-
 struct RegistryNode {
 	using id_type = uint32_t;
 	using mapOfRegistryKeys = std::map<RegistryNode::id_type, std::unique_ptr<RegistryNode>>;
