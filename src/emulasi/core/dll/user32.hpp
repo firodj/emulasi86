@@ -14,6 +14,9 @@ public:
     ~User32Dll();
 
     void Register() override;
+
+    ExportReturnParam wsprintfA(ExportStackParam* param);
 };
+
 ////////////////////////////////////////////////////////////////////////////////
 };
