@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "advapi32.hpp"
+#include <emulasi/core/gameemuabstract.hpp>
 #include <emulasi/core/registry.hpp>
 #include <gtest/gtest.h>
 #include <fmt/core.h>
@@ -13,7 +14,7 @@
 using namespace emulasi;
 
 // The fixture for testing class AdvApi32Test.
-class AdvApi32Test : public testing::Test, public GameEmuInterface {
+class AdvApi32Test : public testing::Test, public GameEmuAbstract {
 protected:
 	// You can remove any or all of the following functions if their bodies would
 	// be empty.

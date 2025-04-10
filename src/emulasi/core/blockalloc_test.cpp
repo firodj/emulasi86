@@ -5,16 +5,7 @@
 
 using namespace emulasi;
 
-class BlockAllocatorTest: public testing::Test
-{
-protected:
-	BlockAllocatorTest() {}
-	~BlockAllocatorTest() override {}
-	void SetUp() override {}
-	void TearDown() override {}
-};
-
-TEST_F(BlockAllocatorTest, allocatedSize)
+TEST(BlockAllocatorTest, allocatedSize)
 {
 	BlockAllocator blockAllocator(0x40000000, 0x1000);
 

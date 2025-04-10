@@ -768,12 +768,14 @@ ExportReturnParam User32Dll::wsprintfA(ExportStackParam* param)
 	char* lpOut      = (char*)game_->Memory(param->args[0]);
 	const char* lpIn = (char*)game_->Memory(param->args[1]);
 
+	const int maxAssumedSize = 1024;
 	int count = 0;
 	unsigned int stackIndex = 2;
-	while(*lpIn != '\0') {
+	bool noError = true;
+	while(*lpIn != '\0' && noError) {
 		const char* nextPercent = strchr(lpIn, '%');
 		if (nextPercent == NULL) {
-			count += sprintf(&lpOut[count], "%s", lpIn);
+			count += snprintf(&lpOut[count], maxAssumedSize-count, "%s", lpIn);
 			break;
 		}
 		unsigned int length = nextPercent - lpIn;
@@ -784,17 +786,18 @@ ExportReturnParam User32Dll::wsprintfA(ExportStackParam* param)
 		char type = *lpIn++;
 		switch(type) {
 			case 'c':
-				count += sprintf(&lpOut[count], "%c", param->args[stackIndex++]);
+				count += snprintf(&lpOut[count], maxAssumedSize-count, "%c", param->args[stackIndex++]);
 				break;
 			case 's':
-				count += sprintf(&lpOut[count], "%s", (char*)game_->Memory(param->args[stackIndex++]));
+				count += snprintf(&lpOut[count], maxAssumedSize-count, "%s", (char*)game_->Memory(param->args[stackIndex++]));
 				break;
 			case 'd':
-				count += sprintf(&lpOut[count], "%d", param->args[stackIndex++]);
+				count += snprintf(&lpOut[count], maxAssumedSize-count, "%d", param->args[stackIndex++]);
 				break;
 			default:
 				fmt::print(stderr, fmt::fg(fmt::color::crimson), "Unknown format type '%c'\n", type);
-				assert(false);
+				game_->PanicEmulation();
+				noError = false;
 		}
 	}
 
@@ -843,12 +846,14 @@ ExportReturnParam API__DispatchMessageA(GameEmuInterface * game_,
 		API__LRESULT retVal = game_->Reg(emulasi::EAX);
 
 		fmt::print(stderr, "retVal={:#x} esp={:#x}\n", (unsigned)retVal, (unsigned)esp);
-		return ExportReturnParam{(signed)retVal, 1};
+		return (signed)retVal;
 	}
 	default:
 		fmt::print(stderr, fmt::fg(fmt::color::crimson), "invalid state {}, possible incorrect stack order\n", state);
 		game_->PanicEmulation();
 	}
+
+	return 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

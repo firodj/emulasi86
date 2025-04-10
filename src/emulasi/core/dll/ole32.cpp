@@ -65,20 +65,19 @@ ExportReturnParam API__CoCreateInstance(GameEmuInterface * game_,
 {
 	int returnValue = 0;
 
-	char clsidString[1024];
-	sprintf(clsidString, "%08" PRIX32 "-%04" PRIX16 "-%04" PRIX16 "-%02" PRIX8 "%02" PRIX8 "-%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8,
+	char clsidString[1025];
+	snprintf(clsidString, 1024, "%08" PRIX32 "-%04" PRIX16 "-%04" PRIX16 "-%02" PRIX8 "%02" PRIX8 "-%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8,
 					clsid->Data1, clsid->Data2, clsid->Data3,
 					clsid->Data4[0], clsid->Data4[1], clsid->Data4[2], clsid->Data4[3],
 					clsid->Data4[4], clsid->Data4[5], clsid->Data4[6], clsid->Data4[7]);
 	fmt::print(stderr, "  (read clsid: {:s})\n", clsidString);
 
-	char iidString[1024];
-	sprintf(iidString, "%08" PRIX32 "-%04" PRIX16 "-%04" PRIX16 "-%02" PRIX8 "%02" PRIX8 "-%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8,
+	char iidString[1025];
+	snprintf(iidString, 1024, "%08" PRIX32 "-%04" PRIX16 "-%04" PRIX16 "-%02" PRIX8 "%02" PRIX8 "-%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8,
 					iid->Data1, iid->Data2, iid->Data3,
 					iid->Data4[0], iid->Data4[1], iid->Data4[2], iid->Data4[3],
 					iid->Data4[4], iid->Data4[5], iid->Data4[6], iid->Data4[7]);
 	fmt::print(stderr, "  (read iid: {:s})\n", iidString);
-
 
 	std::string name;
 

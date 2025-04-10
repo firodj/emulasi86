@@ -2,8 +2,8 @@
 #include "pointer.hpp"
 #include "export.hpp"
 #include "dllbase.hpp"
-#include "gameemu_interface.hpp"
 #include <fmt/color.h>
+#include "gameemuabstract.hpp"
 
 using namespace emulasi;
 
@@ -39,9 +39,10 @@ TEST(Ptr32Test, ExportReturnParam)
 	ASSERT_EQ(returnValue.retVal(), 512);
 }
 
+#if 1
 TEST(Ptr32Test, Mem)
 {
-	class FakeMem: public GameEmuInterface {
+	class FakeMem: public GameEmuAbstract {
 	public:
 		FakeMem(): data(64) {}
  		void* Memory(Address address) override {
@@ -62,6 +63,7 @@ TEST(Ptr32Test, Mem)
 	ASSERT_EQ(*realPtr, 64);
 
 }
+#endif
 
 #if 1
 TEST(Ptr32Test, FormatAs)

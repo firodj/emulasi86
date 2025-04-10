@@ -3,7 +3,6 @@
 #include "emulasi/core/emulation.hpp"
 #include "gdi32.hpp"
 
-#include <glad/gl.h>
 #include <string.h>
 #include <cassert>
 #include <functional>
@@ -122,22 +121,7 @@ ExportReturnParam API__StretchBlt(GameEmuInterface *game_,
 	API__BITMAP* bitmap = (API__BITMAP*) game_->Memory(objectAddress);
 	void* data = game_->Memory(bitmap->bmBits);
 
-	// Update the texture interface
-	if (hdcDest != 0) {
-		GLint previousTexture = 0;
-		glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture);
-		glBindTexture(GL_TEXTURE_2D, hdcDest);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, wDest, hDest, 0, GL_BGR, GL_UNSIGNED_BYTE, data);
-		glBindTexture(GL_TEXTURE_2D, previousTexture);
-	} else {
-		glClearColor(1.0f,0.0f,1.0f,1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-		fmt::print(stderr, "ERROR: invalid destination!\n");
-	}
+	game_->GetGfx()->StretchBlt(hdcDest, wDest, hDest, data);
 
 	returnValue = 1;
 	return returnValue;
