@@ -72,9 +72,9 @@ void GameBase::Init()
 	}
 
 	if (!m_config.vertShaderPath.empty()) {
-		m_shader.loadFromFile(m_config.vertShaderPath, m_config.fragShaderPath);
-		m_shader.compile();
-		m_shader.activate();
+		m_shader.LoadFromFile(m_config.vertShaderPath, m_config.fragShaderPath);
+		m_shader.Compile();
+		m_shader.Activate();
 	}
 
 	m_offscreen.Init(m_screenWidth, m_screenHeight);
@@ -88,7 +88,7 @@ void GameBase::Finish()
 
 GLuint GameBase::PresentTexture()
 {
-	if (m_offscreen.ok()) return m_offscreen.getTexture();
+	if (m_offscreen.IsOk()) return m_offscreen.GetTexture();
 	return GL_NONE;
 }
 
@@ -96,12 +96,61 @@ void GameBase::SwapBuffer()
 {
 	PreSwap();
 
-	if (m_offscreen.ok()) m_offscreen.swapTexture();
+	if (m_offscreen.IsOk()) m_offscreen.SwapTexture();
 
 	if (m_config.useSwap) {
 		SDL_GL_SwapWindow(m_window);
 	}
 }
+
+class SyncFrame
+{
+public:
+	SyncFrame(bool useSwap, int fpsTime):
+		m_useSwap(useSwap), m_fpsTime(fpsTime)
+	{
+		Init();
+	}
+	void Init() {
+		m_oldTick    = SDL_GetTicks64();
+		m_lastTick   = m_oldTick;
+		m_frameCount = 0;
+		m_framerate  = 0;
+	}
+	void Wait() {
+		Uint64 currentTick = SDL_GetTicks64();
+
+		if (!m_useSwap && m_fpsTime > 0) {
+			int wait = m_fpsTime;
+			Uint64 nextTick = m_lastTick + wait;
+			if (currentTick <= nextTick) {
+				wait = nextTick - currentTick;
+			} else {
+				wait = 0;
+				nextTick = currentTick;
+			}
+			if (wait > 0) SDL_Delay(wait);
+			m_lastTick = nextTick;
+		}
+
+		m_frameCount += 1;
+		if (currentTick > m_oldTick + 1000) {
+			m_framerate = m_frameCount * 1000.0f / (float)(currentTick - m_oldTick);
+			m_frameCount = 0;
+			m_oldTick = currentTick;
+		}
+	}
+
+	float FrameRate() { return m_framerate; }
+
+protected:
+	Uint64 m_oldTick;
+	Uint64 m_lastTick;
+	int    m_frameCount;
+	bool   m_useSwap;
+	int    m_fpsTime;
+	float  m_framerate;
+};
 
 int GameBase::Run()
 {
@@ -111,37 +160,16 @@ int GameBase::Run()
 	int err = PreRun();
 	if (err != 0) return err;
 
-	if (m_offscreen.ok()) m_offscreen.activate();
+	if (m_offscreen.IsOk()) m_offscreen.Activate();
 
-	Uint64 old_ticks = SDL_GetTicks64();
-	Uint64 last_tick = old_ticks;
+	SyncFrame syncer(m_config.useSwap, m_config.fpsTime);
 
-	int frame_count = 0;
 	while (!m_requestStop) {
 		err = OnRun();
 		if (err != 0) break;
+		syncer.Wait();
 
-		Uint64 current_tick = SDL_GetTicks64();
-
-		if (!m_config.useSwap && m_config.fpsTime > 0) {
-			int wait = m_config.fpsTime;
-			Uint64 next_tick = last_tick + wait;
-			if (current_tick <= next_tick) {
-				wait = next_tick - current_tick;
-			} else {
-				wait = 0;
-				next_tick = current_tick;
-			}
-			if (wait > 0) SDL_Delay(wait);
-			last_tick = next_tick;
-		}
-
-		frame_count += 1;
-		if (current_tick > old_ticks + 1000) {
-			m_framerate = frame_count * 1000.0f / (float)(current_tick - old_ticks);
-			frame_count = 0;
-			old_ticks = current_tick;
-		}
+		m_framerate = syncer.FrameRate();
 	}
 
 	PostRun();

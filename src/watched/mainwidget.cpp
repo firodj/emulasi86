@@ -207,7 +207,11 @@ void OnRunDemo()
 {
 	Globals *globals = Globals::Resolve();
 
-	auto& new_game = globals->m_games.emplace_back(new emulasi::GameDemo());
+	emulasi::GameBaseConfig cfg;
+	cfg.title = "Demo";
+	cfg.useSwap = true;
+
+	auto& new_game = globals->m_games.emplace_back(new emulasi::GameDemo(cfg));
 	new_game->Init();
 	SDL_GL_MakeCurrent(globals->m_sdlWindow, globals->m_glContext);
 	new_game->StartThread();
