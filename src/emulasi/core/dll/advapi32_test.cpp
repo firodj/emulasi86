@@ -43,7 +43,7 @@ protected:
 		// before the destructor).
 	}
 
-	void * Memory(Address address) override
+	void * Memory(uint32_t address) override
 	{
 		void *data = nullptr;
 		fmt::print(stderr, "-- Access Memory {:#x}", address);
@@ -74,7 +74,7 @@ protected:
 	// for AdvApi32Test.
 
 	std::map<std::string, Export> export_handlers;
-	std::map<Address, std::vector<uint8_t>> memories_;
+	std::map<uint32_t, std::vector<uint8_t>> memories_;
 	RegistryManager m_registryMgr;
 };
 

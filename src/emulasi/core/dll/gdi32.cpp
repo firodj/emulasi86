@@ -36,7 +36,7 @@ ExportReturnParam API__GetStockObject(GameEmuInterface *game_,
  * @return int
  */
 ExportReturnParam API__GetObjectA(GameEmuInterface *game_,
-	Address h, // [in] HANDLE
+	uint32_t h, // [in] HANDLE
 	int        c, // [in]
 	uint32_t * pv // [out] LPVOID
 )
@@ -60,14 +60,14 @@ ExportReturnParam API__GetObjectA(GameEmuInterface *game_,
  * @remark Gdi32.lib
  */
 ExportReturnParam API__CreateCompatibleDC(GameEmuInterface *game_,
-	Address hdc) // [in] HDC
+	uint32_t hdc) // [in] HDC
 {
 	int returnValue = 0;
 
 	fmt::print(stderr, "{}(hdc={:#x})",
 		fmt::styled("CreateCompatibleDC", fmt::fg(fmt::color::gold)), hdc);
 
-	returnValue = game_->Allocate(sizeof(Address));
+	returnValue = game_->Allocate(sizeof(uint32_t));
 
 	return returnValue;
 }
@@ -78,13 +78,13 @@ ExportReturnParam API__CreateCompatibleDC(GameEmuInterface *game_,
  * @remark Gdi32.lib
  */
 ExportReturnParam API__SelectObject(GameEmuInterface *game_,
-	Address hdc, // [in] HDC
-	Address h) // [in] HGDIOBJ
+	uint32_t hdc, // [in] HDC
+	uint32_t h) // [in] HGDIOBJ
 {
 	int returnValue = 0;
 	fmt::print(stderr, "{}(hdc={},h={})\n",
 		fmt::styled("SelectObject", fmt::fg(fmt::color::gold)), hdc, h);
-	*(Address*)game_->Memory(hdc) = h;
+	*(uint32_t*)game_->Memory(hdc) = h;
 	return returnValue;
 }
 
@@ -94,12 +94,12 @@ ExportReturnParam API__SelectObject(GameEmuInterface *game_,
  * @remark Gdi32.lib
  */
 ExportReturnParam API__StretchBlt(GameEmuInterface *game_,
-	Address hdcDest, // [in] HDC
+	uint32_t hdcDest, // [in] HDC
 	int32_t xDest, // [in] int
 	int32_t yDest, // [in] int
 	int32_t wDest, // [in] int
 	int32_t hDest, // [in] int
-	Address hdcSrc, // [in] HDC
+	uint32_t hdcSrc, // [in] HDC
 	int32_t xSrc, // [in] int
 	int32_t ySrc, // [in] int
 	int32_t wSrc, // [in] int
@@ -116,8 +116,7 @@ ExportReturnParam API__StretchBlt(GameEmuInterface *game_,
 		hdcSrc, xSrc, ySrc, wSrc, hSrc, rop
 	);
 
-	// Get the pointer to the object the DC points at, we'll assume that it is a BITMAP
-	Address objectAddress = *(Address*)game_->Memory(hdcSrc);
+	uint32_t objectAddress = *(uint32_t*)game_->Memory(hdcSrc);
 	API__BITMAP* bitmap = (API__BITMAP*) game_->Memory(objectAddress);
 	void* data = game_->Memory(bitmap->bmBits);
 
@@ -133,7 +132,7 @@ ExportReturnParam API__StretchBlt(GameEmuInterface *game_,
  * @remark Gdi32.lib
  */
 ExportReturnParam API__DeleteDC(GameEmuInterface *game_,
-	Address hdc) // [in] HDC
+	uint32_t hdc) // [in] HDC
 {
 	int returnValue = 0;
 
@@ -151,7 +150,7 @@ ExportReturnParam API__DeleteDC(GameEmuInterface *game_,
  * @remark Gdi32.lib
  */
 ExportReturnParam API__DeleteObject(GameEmuInterface *game_,
-	Address ho) // [in] HGDIOBJ
+	uint32_t ho) // [in] HGDIOBJ
 {
 	int returnValue = 0;
 
@@ -169,7 +168,7 @@ ExportReturnParam API__DeleteObject(GameEmuInterface *game_,
  * @remark Gdi32.lib
  */
 ExportReturnParam API__GetPixel(GameEmuInterface *game_,
-	Address hdc, // [in] HDC
+	uint32_t hdc, // [in] HDC
 	int32_t x, // [in] int
 	int32_t y // [in] int
 )

@@ -274,14 +274,14 @@ int CheckMouse(GameEmuInterface * game_, API__MSG* lpMsg, uint32_t hWnd)
 	if (!prevButtons0 && buttons[0]) {
 		memset(lpMsg, 0x00, sizeof(API__MSG));
 
-		lpMsg->message = API(WM_LBUTTONDOWN);
+		lpMsg->message = API__WM_LBUTTONDOWN;
 		lpMsg->hwnd = hWnd;
 		result = 1;
 		fmt::print("WM_LBUTTONDOWN {:#x}\n", lpMsg->hwnd);
 	} else if (prevButtons0 && !buttons[0]) {
 		memset(lpMsg, 0x00, sizeof(API__MSG));
 
-		lpMsg->message = API(WM_LBUTTONUP);
+		lpMsg->message = API__WM_LBUTTONUP;
 		lpMsg->hwnd = hWnd;
 		result = 1;
 		fmt::print("WM_LBUTTONUP {:#x}\n", lpMsg->hwnd);
@@ -373,14 +373,14 @@ ExportReturnParam API__GetMessageA(GameEmuInterface *game_,
 		if (SHOULD_SDL_CLOSE) {
 			memset(lpMsg, 0x00, sizeof(API__MSG));
 
-			lpMsg->message = API(WM_DESTROY);
+			lpMsg->message = API__WM_DESTROY;
 			lpMsg->hwnd = hWnd;
 		} else {
 			result = CheckMouse(game_, lpMsg, hWnd);
 		}
 	}
 
-	result = (lpMsg->message == API(WM_QUIT) || lpMsg->message == API(WM_DESTROY)) ? 0 : 1;
+	result = (lpMsg->message == API__WM_QUIT || lpMsg->message == API__WM_DESTROY) ? 0 : 1;
 
 	return result;
 }
@@ -437,12 +437,12 @@ ExportReturnParam API__MapVirtualKeyA(GameEmuInterface * game_,
 
 	switch(uMapType) {
 		case 1:
-			if (uCode == API(VK_LSHIFT) || uCode == API(VK_RSHIFT)) {
-				returnValue = API(VK_SHIFT);
-			} else if (uCode == API(VK_LCONTROL) || uCode == API(VK_RCONTROL)) {
-				returnValue = API(VK_CONTROL);
-			} else if (uCode == API(VK_LMENU) || uCode == API(VK_RMENU)) {
-				returnValue = API(VK_MENU);
+			if (uCode == API__VK_LSHIFT || uCode == API__VK_RSHIFT) {
+				returnValue = API__VK_SHIFT;
+			} else if (uCode == API__VK_LCONTROL || uCode == API__VK_RCONTROL) {
+				returnValue = API__VK_CONTROL;
+			} else if (uCode == API__VK_LMENU || uCode == API__VK_RMENU) {
+				returnValue = API__VK_MENU;
 			} else {
 				returnValue = uCode;
 			}
@@ -838,7 +838,7 @@ ExportReturnParam API__DispatchMessageA(GameEmuInterface * game_,
 		game_->StackPush(lpMsg->message);
 		game_->StackPush(lpMsg->hwnd);
 
-		Address cb = *(Address*)game_->Memory(game_->wndMainProc());
+		uint32_t cb = *(uint32_t*)game_->Memory(game_->wndMainProc());
 		return ExportReturnParam::AsCall(cb, 1);
 	}
 

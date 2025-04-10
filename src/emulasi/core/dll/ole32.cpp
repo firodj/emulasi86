@@ -60,7 +60,7 @@ ExportReturnParam API__CoCreateInstance(GameEmuInterface * game_,
 	uint32_t pUnkOuter, // [in] LPUNKNOWN
 	uint32_t dwClsContext, // [in] DWORD
 	API__IID * iid, // [in] REFIID
-	Address* ppv // [out] LPVOID
+	uint32_t* ppv // [out] LPVOID
 )
 {
 	int returnValue = 0;

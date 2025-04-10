@@ -45,7 +45,7 @@ TEST(Ptr32Test, Mem)
 	class FakeMem: public GameEmuAbstract {
 	public:
 		FakeMem(): data(64) {}
- 		void* Memory(Address address) override {
+ 		void* Memory(uint32_t address) override {
 			if (address == 0x1000)
 				return &data;
 			return nullptr;
