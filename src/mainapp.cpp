@@ -241,12 +241,12 @@ void MainApp::Init(std::vector<std::string> &args)
 void MainApp::Clean()
 {
 	for (auto& game: m_impl->globals->m_games) {
-		game->setRequestStop(true);
+		game->RequestStop(true);
 	}
 
 	for (auto& game: m_impl->globals->m_games) {
-		game->waitToStop();
-		game->finish();
+		game->WaitToStop();
+		game->Finish();
 	}
 
 #ifdef _USE_HSCPP_

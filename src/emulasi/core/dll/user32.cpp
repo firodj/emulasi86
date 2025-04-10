@@ -572,10 +572,10 @@ ExportReturnParam API__GetSystemMetrics(GameEmuInterface *game_,
 
 	switch(nIndex) {
 		case 0:
-			returnValue = game_ ? game_->windowWidth() : 640; // Horizontal resolution
+			returnValue = game_ ? game_->WindowWidth() : 640; // Horizontal resolution
 			break;
 		case 1:
-			returnValue = game_ ? game_->windowHeight() : 480; // Vertical resolution
+			returnValue = game_ ? game_->WindowHeight() : 480; // Vertical resolution
 			break;
 		case 15:
 			returnValue = 0; //FIXME

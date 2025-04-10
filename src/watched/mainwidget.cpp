@@ -10,7 +10,7 @@
 
 #include "globals.hpp"
 #include "kosongg/hscpp_macros.hpp"
-#include <emulasi/base/gamebase.hpp>
+#include <emulasi/base/gamebasecfg.hpp>
 #include <emulasi/ui/gameemu.hpp>
 #include <emulasi/ui/gamedemo.hpp>
 #include <emulasi/core/com/a3d.hpp>
@@ -208,9 +208,9 @@ void OnRunDemo()
 	Globals *globals = Globals::Resolve();
 
 	auto& new_game = globals->m_games.emplace_back(new emulasi::GameDemo());
-	new_game->init();
+	new_game->Init();
 	SDL_GL_MakeCurrent(globals->m_sdlWindow, globals->m_glContext);
-	new_game->startThread();
+	new_game->StartThread();
 }
 
 void OnRunEntry(GameEntry& entry)
@@ -227,27 +227,27 @@ void OnRunEntry(GameEntry& entry)
 	cfg.title = entry.name;
 	auto& new_game = globals->m_games.emplace_back(new emulasi::GameEmuUI(cfg));
 
-	new_game->init();
+	new_game->Init();
 	SDL_GL_MakeCurrent(globals->m_sdlWindow, globals->m_glContext);
-	new_game->startThread();
+	new_game->StartThread();
 }
 
 bool UpdateGame(emulasi::GameBase* game)
 {
 	Globals *globals = Globals::Resolve();
 
-	if (game->paintUI()) return true;
+	if (game->PaintUI()) return true;
 
-	if (game->stopped()) {
-		std::cout << "Game " << game->title() << " stopped" << std::endl;
-		game->waitToStop();
-		game->finish();
+	if (game->IsStopped()) {
+		std::cout << "Game " << game->m_title << " IsStopped" << std::endl;
+		game->WaitToStop();
+		game->Finish();
 
 		SDL_GL_MakeCurrent(globals->m_sdlWindow, globals->m_glContext);
 		return false;
 	}
 
-	game->setRequestStop(true);
+	game->RequestStop(true);
 	return true;
 }
 
